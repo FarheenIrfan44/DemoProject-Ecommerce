@@ -129,4 +129,29 @@ const updateProduct = async (req, res) => {
   }
 };
 
-export {addProduct, getProductById,getProducts, removeProduct, updateProduct}
+const getProductsOfUser = async(req,res) => {
+  try {
+    const userId = req.user._id;
+    const products = await productModel.find({owner: userId});
+
+    if (!products) {
+      return res.status(404).json({
+        success: false,
+        message: "No product found."
+      })
+    }
+
+    return res.status(200).json({
+      success: true,
+      products
+    })
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Problem occured while fetching products"
+    })
+  }
+}
+
+export {addProduct, getProductById,getProducts, removeProduct, updateProduct, getProductsOfUser}

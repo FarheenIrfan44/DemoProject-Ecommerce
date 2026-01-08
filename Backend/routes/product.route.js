@@ -1,5 +1,5 @@
 import express from "express";
-import {addProduct, getProductById,getProducts, removeProduct, updateProduct} from "../controllers/product.controller.js"
+import {addProduct, getProductById,getProducts, removeProduct, updateProduct, getProductsOfUser} from "../controllers/product.controller.js"
 import { upload } from "../middleware/multer.middleware.js";
 import { verifyJWT } from "../middleware/auth.middleware.js";
 
@@ -22,5 +22,6 @@ productRouter.post(
 
 productRouter.patch('/update/:id', verifyJWT, updateProduct);
 productRouter.delete('/remove/:id', verifyJWT, removeProduct);
+productRouter.get('/getUserProduct', verifyJWT ,getProductsOfUser);
 
 export default productRouter;
