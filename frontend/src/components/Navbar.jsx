@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faAngleLeft,
@@ -10,9 +10,11 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { Link, NavLink } from "react-router-dom";
 import { useState } from "react";
+import { ShopContext } from "../context/ShopContext";
 
 const Navbar = () => {
   const [visible, setVisible] = useState(false);
+  const {setShowSearch, getCartCount} = useContext(ShopContext)
 
   return (
     <div className="flex items-center justify-between py-5 font-medium">
@@ -48,6 +50,7 @@ const Navbar = () => {
           icon={faMagnifyingGlass}
           size="lg"
           className="cursor-pointer"
+          onClick={() => setShowSearch(true)}
         />
         <div className="group relative">
           <FontAwesomeIcon icon={faUser} size="lg" className="cursor-pointer" />
@@ -63,7 +66,7 @@ const Navbar = () => {
         <Link to="/cart" className="relative">
           <FontAwesomeIcon icon={faBasketShopping} size="lg" />
           <p className="absolute -right-1.25 -bottom-1.25 w-4 text-center leading-4 bg-black text-white aspect-square rounded-full text-[8px]">
-            10
+           {getCartCount()}
           </p>
         </Link>
 
@@ -71,7 +74,7 @@ const Navbar = () => {
           onClick={() => setVisible(true)}
           icon={faBars}
           size="lg"
-          className="cursor-pointer sm:hidden"
+          className="cursor-pointer block! sm:hidden!"
         />
       </div>
 

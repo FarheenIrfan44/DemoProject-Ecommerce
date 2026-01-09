@@ -4,12 +4,7 @@ import { useState } from "react";
 import { useEffect } from "react";
 import axios from "axios";
 import ProductItem from "./ProductItem";
-
-const fetchProducts = async () => {
-  const response = await axios.get("http://localhost:4000/api/product/get");
-  //console.log(response.data.products)
-  return response.data;
-};
+import { fetchProducts } from "../utils/fetchProducts";
 
 const LatestCollection = () => {
   const [latestProduct, setLatestProduct] = useState([]);
@@ -17,6 +12,7 @@ const LatestCollection = () => {
   useEffect(() => {
     const loadProducts = async () => {
       const data = await fetchProducts();
+      // console.log(data)
       setLatestProduct(data.products);
     };
 
