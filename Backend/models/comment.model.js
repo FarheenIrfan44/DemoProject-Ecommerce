@@ -4,12 +4,12 @@ const commentSchema = mongoose.Schema({
     content : {type: String, required: true},
     productId: {
         type: Schema.Types.ObjectId,
-        ref: "productModel",
+        ref: "product",
         required: true
     },
     ownerId: {
         type: Schema.Types.ObjectId,
-        ref: "userModel",
+        ref: "user",
         required: true
     },
     date: {type: Number, required: true}

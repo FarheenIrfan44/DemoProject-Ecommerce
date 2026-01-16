@@ -2,7 +2,6 @@ import commentModel from "../models/comment.model.js";
 import productModel from "../models/product.model.js";
 import mongoose from "mongoose";
 
-
 const addComment = async (req, res) => {
   try {
     const { content } = req.body;
@@ -21,6 +20,12 @@ const addComment = async (req, res) => {
     }
     const ownerId = req.user._id;
     const product = await productModel.findById(productId);
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found.",
+      });
+    }
 
     if (req.user._id.toString() === product.owner.toString()) {
       return res.status(400).json({
@@ -35,18 +40,17 @@ const addComment = async (req, res) => {
       ownerId,
       date: Date.now(),
     };
-   const comment = new commentModel(newComment);
+    const comment = new commentModel(newComment);
     await comment.save();
     return res.status(200).json({
-        succcess: true,
-        comment: newComment
+      succcess: true,
+      comment: newComment,
     });
   } catch (error) {
     console.log(error);
     return res.status(500).json({
-      succcess: false,
+      success: false,
       message: "The comment can not be added.",
-      comment
     });
   }
 };
@@ -59,17 +63,19 @@ const updateComment = async (req, res) => {
     const comment = await commentModel.findById(commentId);
 
     if (!comment) {
-      return res.status(404).json({ 
+      return res.status(404).json({
         success: false,
-        message: "Comment not found" });
+        message: "Comment not found",
+      });
     }
 
-    console.log(req.user._id)
+    console.log(req.user._id);
 
     if (comment.ownerId.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ 
+      return res.status(403).json({
         success: false,
-        message: "You are not allowed to comment on your own product." });
+        message: "You are not allowed to comment on your own product.",
+      });
     }
 
     comment.content = content;
@@ -77,17 +83,16 @@ const updateComment = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      data: comment
+      data: comment,
     });
-
   } catch (error) {
-    console.log(error)
-    return res.status(500).json({ 
-        success: false,
-        message: "Update failed" });
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Update failed",
+    });
   }
 };
-
 
 const removeComment = async (req, res) => {
   try {
@@ -97,14 +102,14 @@ const removeComment = async (req, res) => {
     if (!comment) {
       return res.status(404).json({
         success: false,
-        message: "Comment not found"
+        message: "Comment not found",
       });
     }
 
     if (comment.ownerId.toString() !== req.user._id.toString()) {
       return res.status(403).json({
         success: false,
-        message: "You are not allowed to delete this comment"
+        message: "You are not allowed to delete this comment",
       });
     }
 
@@ -112,17 +117,15 @@ const removeComment = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "Comment deleted successfully"
+      message: "Comment deleted successfully",
     });
-
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: "Failed to delete comment"
+      message: "Failed to delete comment",
     });
   }
 };
-
 
 const getComment = async (req, res) => {
   try {
@@ -130,7 +133,7 @@ const getComment = async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(productId)) {
       return res.status(400).json({
         success: false,
-        message: "Invalid product id"
+        message: "Invalid product id",
       });
     }
 
@@ -138,23 +141,24 @@ const getComment = async (req, res) => {
     if (!product) {
       return res.status(404).json({
         success: false,
-        message: "Product does not exist"
+        message: "Product does not exist",
       });
     }
 
-    const comments = await commentModel.find({ productId }).sort({ createdAt: -1 });
-    console.log(comments)
-      
+    const comments = await commentModel
+      .find({ productId })
+      .sort({ createdAt: -1 });
+    // console.log(comments)
+
     return res.status(200).json({
       success: true,
-      data: comments
+      data: comments,
     });
-
   } catch (error) {
-    console.log(error)
+    console.log(error);
     return res.status(500).json({
       success: false,
-      message: "Failed to fetch comments"
+      message: "Failed to fetch comments",
     });
   }
 };

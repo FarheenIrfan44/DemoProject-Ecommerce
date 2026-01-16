@@ -8,7 +8,7 @@ const productSchema = new mongoose.Schema({
     category: {type: String, required: true},
     owner: {
             type: Schema.Types.ObjectId,
-            ref: "userModel",
+            ref: "user",
             required: true
         },
     serialNumber : {type: String,required: true}

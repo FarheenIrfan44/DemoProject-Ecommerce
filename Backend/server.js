@@ -13,8 +13,18 @@ import orderRouter from "./routes/order.route.js";
 const app = express();
 app.use(express.json());
 const PORT = process.env.PORT || 4000;
-connectDB();
+//connectDB();
 //connectCloudinary();
+const start = async () => {
+  await connectDB();
+
+  app.listen(PORT, () => console.log(`Server is listning on port http://localhost:${PORT}`))
+};
+
+start().catch((err) => {
+  console.error("Startup failed:", err);
+  process.exit(1);
+});
 
 app.use(express.json());
 app.use(cors());
@@ -29,6 +39,3 @@ app.get("/", (req, res) => {
   res.send(`Welcome to E-commerce app`);
 });
 
-app.listen(PORT, () =>
-  console.log(`Server is listning on port http://localhost:${PORT}`)
-);

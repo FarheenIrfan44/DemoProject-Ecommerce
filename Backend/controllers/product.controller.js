@@ -17,9 +17,9 @@ try {
     let imagesUrl = await Promise.all(
         images.map(async (item) => {
             let result = await uploadOnCloudinary(item.path);
-            return result.secure_url
-        })
-    )
+            return result?.secure_url || null
+        })).then(urls => urls.filter(Boolean));
+    
     const owner = req.user._id;
 
     const productData = {
@@ -116,9 +116,8 @@ const updateProduct = async (req, res) => {
       ['image1', 'image2', 'image3', 'image4'].forEach(key => {
         if (req.files[key]) images.push(req.files[key][0].path);
       });
-      if (images.length > 0) product.images = images;  
+      if (images.length > 0) product.image = images;  
     }
-
     await product.save();
 
     return res.status(200).json(product);

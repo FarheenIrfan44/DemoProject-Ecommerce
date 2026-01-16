@@ -10,20 +10,19 @@ const addToCart = async (req, res) => {
     if (!product) {
       return res.status(404).json({
         success: false,
-        message: "Product not found"
+        message: "Product not found",
       });
     }
 
     if (product.owner.toString() === userId.toString()) {
       return res.status(400).json({
         success: false,
-        message: "You cannot add your own product to cart"
+        message: "You cannot add your own product to cart",
       });
     }
 
     const user = await userModel.findById(userId);
 
-    
     let cartData = user.cartData || new Map();
 
     if (cartData.has(productId)) {
@@ -37,18 +36,16 @@ const addToCart = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "Added to cart"
+      message: "Added to cart",
     });
-
   } catch (error) {
     console.log(error);
     return res.status(500).json({
       success: false,
-      message: "Problem occurred while adding item to cart"
+      message: "Problem occurred while adding item to cart",
     });
   }
 };
-
 
 const updateCartQuantity = async (req, res) => {
   try {
@@ -59,7 +56,7 @@ const updateCartQuantity = async (req, res) => {
     if (!["increment", "decrement"].includes(action)) {
       return res.status(400).json({
         success: false,
-        message: "Invalid action. Must be 'increment' or 'decrement'."
+        message: "Invalid action. Must be 'increment' or 'decrement'.",
       });
     }
 
@@ -68,7 +65,7 @@ const updateCartQuantity = async (req, res) => {
     if (!user || !user.cartData || !user.cartData.has(productId)) {
       return res.status(404).json({
         success: false,
-        message: "Product not found in cart"
+        message: "Product not found in cart",
       });
     }
 
@@ -79,11 +76,11 @@ const updateCartQuantity = async (req, res) => {
     } else if (action === "decrement") {
       quantity -= 1;
       if (quantity <= 0) {
-        user.cartData.delete(productId); // remove if quantity goes to 0
+        user.cartData.delete(productId);
         await user.save();
         return res.status(200).json({
           success: true,
-          message: "Product removed from cart"
+          message: "Product removed from cart",
         });
       }
     }
@@ -95,54 +92,50 @@ const updateCartQuantity = async (req, res) => {
       success: true,
       message: "Cart updated",
       productId,
-      quantity
+      quantity,
     });
-
   } catch (error) {
     console.log(error);
     return res.status(500).json({
       success: false,
-      message: "Problem occurred while updating cart"
+      message: "Problem occurred while updating cart",
     });
   }
 };
-
 
 const getUserCart = async (req, res) => {
   try {
     const userId = req.user._id;
     const user = await userModel.findById(userId);
 
-    
     const cartMap = user.cartData || new Map();
     const cartObj = Object.fromEntries(cartMap);
 
     const productIds = Object.keys(cartObj);
 
-    
-    const products = await productModel.find({
-      _id: { $in: productIds }
-    }).select("name price images"); 
+    const products = await productModel
+      .find({
+        _id: { $in: productIds },
+      })
+      .select("name price image");
 
-    
-    const cartWithDetails = products.map(product => ({
+    const cartWithDetails = products.map((product) => ({
       _id: product._id,
       name: product.name,
       price: product.price,
       images: product.images,
-      quantity: cartObj[product._id.toString()]
+      quantity: cartObj[product._id.toString()],
     }));
 
     return res.status(200).json({
       success: true,
-      cart: cartWithDetails
+      cart: cartWithDetails,
     });
-
   } catch (error) {
     console.log(error);
     return res.status(500).json({
       success: false,
-      message: "Problem occurred while getting cart."
+      message: "Problem occurred while getting cart.",
     });
   }
 };
@@ -156,7 +149,7 @@ const removeFromCart = async (req, res) => {
     if (!user || !user.cartData) {
       return res.status(404).json({
         success: false,
-        message: "Cart is empty"
+        message: "Cart is empty",
       });
     }
 
@@ -166,20 +159,19 @@ const removeFromCart = async (req, res) => {
 
       return res.status(200).json({
         success: true,
-        message: "Product removed from cart"
+        message: "Product removed from cart",
       });
     } else {
       return res.status(404).json({
         success: false,
-        message: "Product not found in cart"
+        message: "Product not found in cart",
       });
     }
-
   } catch (error) {
     console.log(error);
     return res.status(500).json({
       success: false,
-      message: "Problem occurred while removing item from cart"
+      message: "Problem occurred while removing item from cart",
     });
   }
 };
@@ -192,7 +184,7 @@ const mergeCart = async (req, res) => {
     if (!guestCart || Object.keys(guestCart).length === 0) {
       return res.status(200).json({
         success: true,
-        message: "No guest cart to merge"
+        message: "No guest cart to merge",
       });
     }
 
@@ -200,7 +192,13 @@ const mergeCart = async (req, res) => {
     const userCart = user.cartData || new Map();
 
     for (let productId in guestCart) {
-      const qty = guestCart[productId];
+      const qty = Number(guestCart[productId]);
+      if (!Number.isInteger(qty) || qty <= 0) {
+        return res.status(404).json({
+          success: false,
+          message: "Cart item quantity can not be negative or 0",
+        });
+      }
 
       if (userCart.has(productId)) {
         userCart.set(productId, userCart.get(productId) + qty);
@@ -214,17 +212,21 @@ const mergeCart = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "Cart merged successfully"
+      message: "Cart merged successfully",
     });
-
   } catch (error) {
     console.log(error);
     return res.status(500).json({
       success: false,
-      message: "Failed to merge cart"
+      message: "Failed to merge cart",
     });
   }
 };
 
-
-export {addToCart, updateCartQuantity, getUserCart, removeFromCart, mergeCart}
+export {
+  addToCart,
+  updateCartQuantity,
+  getUserCart,
+  removeFromCart,
+  mergeCart,
+};
