@@ -22,6 +22,12 @@ const addToCart = async (req, res) => {
     }
 
     const user = await userModel.findById(userId);
+    if(!user){
+      return res.status(404).json({
+        success: false,
+        message: "User not found."
+      })
+    }
 
     let cartData = user.cartData || new Map();
 
@@ -107,6 +113,12 @@ const getUserCart = async (req, res) => {
   try {
     const userId = req.user._id;
     const user = await userModel.findById(userId);
+    if(!user){
+      return res.status(404).json({
+        success: false,
+        message: "User not found."
+      })
+    }
 
     const cartMap = user.cartData || new Map();
     const cartObj = Object.fromEntries(cartMap);
@@ -123,7 +135,7 @@ const getUserCart = async (req, res) => {
       _id: product._id,
       name: product.name,
       price: product.price,
-      images: product.images,
+      image: product.images,
       quantity: cartObj[product._id.toString()],
     }));
 
@@ -189,6 +201,12 @@ const mergeCart = async (req, res) => {
     }
 
     const user = await userModel.findById(userId);
+    if(!user){
+      return res.status(404).json({
+        success: false,
+        message: "User not found."
+      })
+    }
     const userCart = user.cartData || new Map();
 
     for (let productId in guestCart) {

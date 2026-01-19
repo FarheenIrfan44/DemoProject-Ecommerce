@@ -69,7 +69,7 @@ const updateComment = async (req, res) => {
       });
     }
 
-    console.log(req.user._id);
+    //console.log(req.user._id);
 
     if (comment.ownerId.toString() !== req.user._id.toString()) {
       return res.status(403).json({
