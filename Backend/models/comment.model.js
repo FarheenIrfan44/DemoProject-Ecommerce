@@ -12,7 +12,7 @@ const commentSchema = mongoose.Schema({
         ref: "user",
         required: true
     },
-    date: {type: Number, required: true}
+    date: {type: Date, required: true}
 
 }, {timestamps: true}
 )
