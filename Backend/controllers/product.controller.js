@@ -6,11 +6,35 @@ import commentModel from "../models/comment.model.js";
 const addProduct = async (req, res) => {
   try {
     const { name, description, price, category } = req.body;
+    if (!name) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide name."
+      })
+    }
+    if (!description) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide description."
+      })
+    }
+    if (!price) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide price."
+      })
+    }
+    if (!category) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide category."
+      })
+    }
     const files = req.files ?? {}
     const image1 = files.image1?.[0];
-    const image2 = files.image1?.[0];
-    const image3 = files.image1?.[0];
-    const image4 = files.image1?.[0];
+    const image2 = files.image2?.[0];
+    const image3 = files.image3?.[0];
+    const image4 = files.image4?.[0];
     const serialNumber = generateSerialNumber();
 
     const images = [image1, image2, image3, image4].filter(
@@ -109,33 +133,11 @@ const updateProduct = async (req, res) => {
     if (!product) return res.status(404).json({ message: "Product not found" });
     if (product.owner.toString() !== req.user._id.toString())
       return res.status(403).json({ message: "Not allowed" });
-    const { name, description, price, replaceIndex } = req.body;
+    const { name, description, price} = req.body;
     if (name) product.name = name;
     if (description) product.description = description;
-    if (price) product.price = Number(price);
-    const image1 = req.files?.image1 && req.files.image1[0];
-    const image2 = req.files?.image2 && req.files.image2[0];
-    const image3 = req.files?.image3 && req.files.image3[0];
-    const image4 = req.files?.image4 && req.files.image4[0];
-
-    const images = [image1, image2, image3, image4].filter(Boolean);
-
-    if (images.length > 0) {
-      const uploadedUrls = await Promise.all(
-        images.map(async (item) => {
-          const result = await uploadOnCloudinary(item.path);
-          return result?.secure_url || null;
-        })
-      ).then((urls) => urls.filter(Boolean));
-
-      uploadedUrls.forEach((url, index) => {
-        if (product.image.length < 4) {
-          product.image.push(url);
-        } else if (replaceIndex !== undefined) {
-          product.image[replaceIndex] = url;
-        }
-      });
-    }
+    if (price !== undefined) product.price = Number(price);
+  
     await product.save();
     return res.status(200).json({
       success: true,

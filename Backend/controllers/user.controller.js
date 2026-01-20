@@ -98,8 +98,8 @@ const signupUser = async (req, res) => {
 
     res.status(200).json({ success: true, token });
   } catch (error) {
-    console.log(error);
-    res.status(400).json({ success: false, message: error.message });
+   console.error("Signup Error:", error);
+res.status(500).json({ success: false, message: error.message });
   }
 };
 

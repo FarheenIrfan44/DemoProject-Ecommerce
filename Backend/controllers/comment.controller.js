@@ -1,36 +1,55 @@
 import commentModel from "../models/comment.model.js";
 import productModel from "../models/product.model.js";
 import mongoose from "mongoose";
+import {
+  STATUS_OK,
+  STATUS_NOT_FOUND,
+  STATUS_BAD_REQUEST,
+  STATUS_INTERNAL_ERROR,
+  MSG_PRODUCT_NOT_FOUND,
+  MSG_SERVER_PROBLEM,
+  MSG_COMMENT_BODY_MISSING,
+  MSG_COMMENT_DELETED,
+  MSG_COMMENT_FAIL,
+  MSG_COMMENT_NOT_FOUND,
+  MSG_FETCH_FAILED_COMMENTS,
+  MSG_FORBIDDEN_OPERATION,
+  MSG_PRODUCT_ID_MISSING,
+  MSG_PRODUCT_NOT_EXISTS,
+  MSG_UPDATE_FAILED,
+  STATUS_FORBIDDEN,
+  MSG_NOT_ALLOWED,
+} from "../constants/index.js";
 
 const addComment = async (req, res) => {
   try {
     const { content } = req.body;
     const productId = req.params.id;
     if (!content) {
-      return res.status(400).json({
+      return res.status(STATUS_BAD_REQUEST).json({
         succcess: false,
-        message: "The comment should have a body.",
+        message: MSG_COMMENT_BODY_MISSING,
       });
     }
     if (!productId) {
-      return res.status(400).json({
+      return res.status(STATUS_BAD_REQUEST).json({
         succcess: false,
-        message: "The product id should be provided.",
+        message: MSG_PRODUCT_ID_MISSING,
       });
     }
     const ownerId = req.user._id;
     const product = await productModel.findById(productId);
     if (!product) {
-      return res.status(404).json({
+      return res.status(STATUS_NOT_FOUND).json({
         success: false,
-        message: "Product not found.",
+        message: MSG_PRODUCT_NOT_FOUND,
       });
     }
 
     if (req.user._id.toString() === product.owner.toString()) {
-      return res.status(400).json({
+      return res.status(STATUS_FORBIDDEN).json({
         success: false,
-        message: "Product owner cannot comment on their own product.",
+        message: `${MSG_FORBIDDEN_OPERATION}.Product owner cannot comment on their own product.`,
       });
     }
 
@@ -42,15 +61,15 @@ const addComment = async (req, res) => {
     };
     const comment = new commentModel(newComment);
     await comment.save();
-    return res.status(200).json({
-      succcess: true,
+    return res.status(STATUS_OK).json({
+      success: true,
       comment: newComment,
     });
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({
+    //console.log(error);
+    return res.status(STATUS_INTERNAL_ERROR).json({
       success: false,
-      message: "The comment can not be added.",
+      message: `${MSG_SERVER_PROBLEM}The comment can not be added.`,
     });
   }
 };
@@ -63,33 +82,33 @@ const updateComment = async (req, res) => {
     const comment = await commentModel.findById(commentId);
 
     if (!comment) {
-      return res.status(404).json({
+      return res.status(STATUS_NOT_FOUND).json({
         success: false,
-        message: "Comment not found",
+        message: MSG_COMMENT_NOT_FOUND,
       });
     }
 
     //console.log(req.user._id);
 
     if (comment.ownerId.toString() !== req.user._id.toString()) {
-      return res.status(403).json({
+      return res.status(STATUS_FORBIDDEN).json({
         success: false,
-        message: "You are not allowed to comment on your own product.",
+        message: `${MSG_NOT_ALLOWED}to update this comment.`,
       });
     }
 
     comment.content = content;
     await comment.save();
 
-    return res.status(200).json({
+    return res.status(STATUS_OK).json({
       success: true,
       data: comment,
     });
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({
+    //console.log(error);
+    return res.status(STATUS_INTERNAL_ERROR).json({
       success: false,
-      message: "Update failed",
+      message: MSG_UPDATE_FAILED,
     });
   }
 };
@@ -100,29 +119,29 @@ const removeComment = async (req, res) => {
     const comment = await commentModel.findById(commentId);
 
     if (!comment) {
-      return res.status(404).json({
+      return res.status(STATUS_NOT_FOUND).json({
         success: false,
-        message: "Comment not found",
+        message: MSG_COMMENT_NOT_FOUND,
       });
     }
 
     if (comment.ownerId.toString() !== req.user._id.toString()) {
-      return res.status(403).json({
+      return res.status(STATUS_FORBIDDEN).json({
         success: false,
-        message: "You are not allowed to delete this comment",
+        message: `${MSG_FORBIDDEN_OPERATION}.You are not allowed to delete this comment.`,
       });
     }
 
     await commentModel.findByIdAndDelete(commentId);
 
-    return res.status(200).json({
+    return res.status(STATUS_OK).json({
       success: true,
-      message: "Comment deleted successfully",
+      message: MSG_COMMENT_DELETED,
     });
   } catch (error) {
-    return res.status(500).json({
+    return res.status(STATUS_INTERNAL_ERROR).json({
       success: false,
-      message: "Failed to delete comment",
+      message: MSG_COMMENT_FAIL,
     });
   }
 };
@@ -131,34 +150,34 @@ const getComment = async (req, res) => {
   try {
     const productId = req.params.productId;
     if (!mongoose.Types.ObjectId.isValid(productId)) {
-      return res.status(400).json({
+      return res.status(STATUS_BAD_REQUEST).json({
         success: false,
-        message: "Invalid product id",
+        message: MSG_PRODUCT_ID_MISSING,
       });
     }
 
     const product = await productModel.findById(productId);
     if (!product) {
-      return res.status(404).json({
+      return res.status(STATUS_NOT_FOUND).json({
         success: false,
-        message: "Product does not exist",
+        message: MSG_PRODUCT_NOT_EXISTS,
       });
     }
 
     const comments = await commentModel
       .find({ productId })
       .sort({ createdAt: -1 });
-    // console.log(comments)
+    // console.error(comments)
 
-    return res.status(200).json({
+    return res.status(STATUS_OK).json({
       success: true,
       data: comments,
     });
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({
+    //console.error(error);
+    return res.status(STATUS_INTERNAL_ERROR).json({
       success: false,
-      message: "Failed to fetch comments",
+      message: MSG_FETCH_FAILED_COMMENTS,
     });
   }
 };
