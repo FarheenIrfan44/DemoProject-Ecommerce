@@ -13,7 +13,7 @@ const orderSchema = new mongoose.Schema({
     default: "ORDER_PLACED",
   },
   paymentMethod: { type: String, required: true },
-  payment: { type: Boolean, required: true, default: "isPaid" },
+  payment: { type: String, required: true, default: "isPaid" },
   date: { type: Date, required: true },
 });
 
